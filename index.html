@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="es" data-theme="ext">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cazachollos</title>
+<meta name="description" content="Tus chollos de Wallapop y Vinted, mercado, modo vendedor y beneficios.">
+<meta name="theme-color" content="#0a0c11">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cazachollos">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap">
+<link rel="stylesheet" href="app.css">
+<script>try{var t=JSON.parse(localStorage.getItem("cz.settings")||"{}").theme;if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="pull" id="pull"><span>↻</span></div>
+<header class="top">
+  <div class="toprow">
+    <div class="brand"><img src="icon-192.png" alt=""><div><b>Cazachollos</b><small id="status"><span class="dot"></span><span>Cargando…</span></small></div></div>
+    <button class="iconbtn" id="refreshBtn" aria-label="Actualizar"><span>↻</span></button>
+  </div>
+  <div class="ptitle"><h1 id="title">Resumen</h1><p id="subtitle"></p></div>
+</header>
+
+<main>
+  <!-- RESUMEN -->
+  <section id="resumen" class="tab on">
+    <div class="kpis">
+      <div class="kpi"><small>Chollos 24 h</small><b id="kToday">0</b><span id="kTodayS" class="muted"></span></div>
+      <div class="kpi"><small>Margen potencial hoy</small><b id="kMargin" class="pos">0 €</b><span class="muted">si compras y revendes a mercado</span></div>
+      <div class="kpi"><small>Stock sin vender</small><b id="kStock">0</b><span id="kStockV" class="muted"></span></div>
+      <div class="kpi"><small>Beneficio realizado</small><b id="kProfit" class="pos">0 €</b><span id="kProfitN" class="muted"></span></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h3>Mejores chollos ahora</h3><button class="link" data-go="chollos">Ver todos →</button></div>
+      <div id="topList" class="list"></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h3>Black Friday</h3><span class="tag">27 nov</span></div>
+      <div class="bfnum"><b id="bfDays">–</b><span class="muted">días</span></div>
+      <p class="muted small" style="margin:0">El mercado nuevo baja precios y arrastra al de segunda mano. Vende tu stock antes y prepara compras para Navidad.</p>
+      <div id="bfTodo" class="todo"></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h3>Precio de mercado (Wallapop)</h3><button class="link" data-go="mercado">Detalle →</button></div>
+      <div id="miniMarket" class="mini"></div>
+    </div>
+    <div class="panel install hidden" id="installTip"><i>📲</i><div class="small"><b>Instálala como app:</b> en Safari pulsa <b>Compartir</b> → <b>Añadir a pantalla de inicio</b>.</div></div>
+  </section>
+
+  <!-- CHOLLOS -->
+  <section id="chollos" class="tab">
+    <div class="filters">
+      <div class="searchrow">
+        <input id="q" class="input" placeholder="Buscar: switch, ps5, iphone 14…" autocomplete="off">
+        <select id="sort" class="input" style="width:auto;flex:none"><option value="score">Mejores</option><option value="new">Recientes</option><option value="disc">Descuento</option><option value="margin">Margen</option><option value="cheap">Más baratos</option></select>
+      </div>
+      <div class="chips" id="tierChips">
+        <button class="chip on" data-tier="">Todos</button><button class="chip tS" data-tier="S">🟢 S</button><button class="chip tA" data-tier="A">🟠 A</button><button class="chip tB" data-tier="B">🔵 B</button>
+        <button class="chip" data-plat="Wallapop">Wallapop</button><button class="chip" data-plat="Vinted">Vinted</button><button class="chip" data-saved="1">⭐ Guardados</button>
+      </div>
+      <div class="chips" id="prodChips"></div>
+    </div>
+    <div class="count" id="count"></div>
+    <div id="grid" class="grid"></div>
+    <div id="sentinel" class="sentinel"></div>
+    <div id="empty" class="empty hidden"><div class="radar"></div><p>No hay chollos con estos filtros.</p></div>
+  </section>
+
+  <!-- TIENDAS -->
+  <section id="tiendas" class="tab">
+    <div class="banner"><b>Ofertas de tiendas (Chollómetro)</b> · Solo productos de tus búsquedas. El margen compara el precio nuevo con lo que se paga de segunda mano en Wallapop.</div>
+    <div class="panel"><div id="shopList" class="list"></div>
+    <div id="shopEmpty" class="empty hidden"><p>Todavía no hay ofertas de tus productos. La nube las revisa sola.</p></div></div>
+  </section>
+
+  <!-- MERCADO -->
+  <section id="mercado" class="tab">
+    <p class="muted small" style="margin-top:0">Mediana de precios de cada búsqueda en Wallapop y Vinted. <b>Compra</b> = el 25 % más barato de los anuncios.</p>
+    <div id="marketGrid" class="mgrid"></div>
+  </section>
+
+  <!-- VIGILADOS -->
+  <section id="vigilados" class="tab">
+    <div class="panel">
+      <div class="row"><input id="watchUrl" class="input" placeholder="Pega un enlace de Wallapop o Vinted…"><button id="watchAddBtn" class="btn primary">Vigilar</button></div>
+      <p class="muted small" style="margin:10px 0 0">Desde un chollo pulsa 👁 para vigilarlo. Los avisos por Telegram de bajadas los manda la extensión del PC.</p>
+    </div>
+    <div id="watchList" class="wgrid"></div>
+    <div id="watchEmpty" class="empty hidden"><p>No vigilas ningún anuncio todavía.</p></div>
+  </section>
+
+  <!-- MODO VENDEDOR -->
+  <section id="vendedor" class="tab">
+    <div class="panel syncbar">
+      <div id="syncInfo" class="syncinfo"></div>
+      <button class="btn primary block" data-import>📥 Importar datos del PC</button>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><small>Productos a la venta</small><b id="sProducts">0</b><span id="sListings" class="muted"></span></div>
+      <div class="kpi"><small>Valor del stock</small><b id="sValue">0 €</b><span class="muted">a tu precio de venta</span></div>
+      <div class="kpi"><small>Visitas</small><b id="sViews">0</b><span id="sFavs" class="muted"></span></div>
+      <div class="kpi"><small>Para resubir</small><b id="sRelist" class="warnc">0</b><span class="muted">7+ días Wallapop · 10+ Vinted</span></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h3>Qué hacer hoy</h3><span class="muted small">Tú decides</span></div>
+      <div id="sActions" class="actions"></div>
+    </div>
+    <div class="chips" id="sFilter" style="margin-bottom:10px"><button class="chip on" data-f="">Todos</button><button class="chip" data-f="relist">Resubir</button><button class="chip" data-f="Wallapop">Wallapop</button><button class="chip" data-f="Vinted">Vinted</button></div>
+    <div id="sBody"></div>
+    <div id="sEmpty" class="empty hidden"><div class="radar"></div><p>En el PC, abre la extensión → <b>Modo vendedor</b> → <b>📲 Enviar al móvil</b>. Te llega un código por Telegram: cópialo y pulsa <b>Importar</b> aquí.</p></div>
+  </section>
+
+  <!-- BENEFICIOS -->
+  <section id="beneficios" class="tab">
+    <div class="kpis">
+      <div class="kpi"><small>Beneficio total</small><b id="pTotal" class="pos">0 €</b><span id="pMargin" class="muted"></span></div>
+      <div class="kpi"><small>Este mes</small><b id="pMonth">0 €</b><span id="pMonthS" class="muted"></span></div>
+      <div class="kpi"><small>Ventas totales</small><b id="pIncome">0 €</b><span id="pSold" class="muted"></span></div>
+      <div class="kpi"><small>Dinero en stock</small><b id="pInvested">0 €</b><span id="pExpected" class="muted"></span></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h3>Beneficio por mes</h3></div>
+      <div class="lg" style="margin-bottom:6px"><span><i style="background:#38bdf8"></i>Ventas</span><span><i style="background:#ef4444"></i>Gastos</span><span><i style="background:#22c55e"></i>Beneficio</span></div>
+      <div id="pChart" class="pchart"></div>
+      <p id="pNote" class="muted small"></p>
+    </div>
+    <div class="panel"><div class="ph"><h3>Ventas</h3></div><div id="pSales"></div></div>
+    <div class="panel"><div class="ph"><h3>Comprado y sin vender</h3></div><div id="pStock" class="list"></div></div>
+    <div class="panel">
+      <div class="ph"><h3>Costes que no salen en las webs</h3></div>
+      <p class="muted small" style="margin-top:0">Compras en mano y coste por unidad de lo que compras fuera.</p>
+      <div id="pCosts"></div>
+      <form id="pExtraForm" class="iform">
+        <input class="input full" name="title" placeholder="Compra en mano (ej. Switch a Pepe)" required>
+        <input class="input" name="price" type="number" step="0.01" inputmode="decimal" placeholder="€" required>
+        <input class="input" name="date" type="date" required>
+        <button class="btn full">Añadir</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- MI STOCK -->
+  <section id="inventario" class="tab">
+    <div class="kpis">
+      <div class="kpi"><small>Invertido</small><b id="iInv">0 €</b></div>
+      <div class="kpi"><small>Valor a la venta</small><b id="iVal">0 €</b></div>
+      <div class="kpi"><small>Beneficio realizado</small><b id="iProfit" class="pos">0 €</b></div>
+      <div class="kpi"><small>Días hasta vender</small><b id="iDays">–</b></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h3>Añadir producto</h3></div>
+      <form id="invForm" class="iform">
+        <input class="input full" name="name" placeholder="Producto (ej. Switch V2 + mando Pro)" required>
+        <input class="input" name="cost" type="number" step="0.01" inputmode="decimal" placeholder="Me costó €" required>
+        <input class="input" name="price" type="number" step="0.01" inputmode="decimal" placeholder="Lo vendo a €">
+        <select class="input" name="where"><option>Wallapop + Vinted</option><option>Wallapop</option><option>Vinted</option></select>
+        <input class="input" name="listedAt" type="date">
+        <button class="btn primary full">Añadir</button>
+      </form>
+    </div>
+    <div class="panel"><div class="ph"><h3>Mi stock</h3><button id="invCsv" class="link">Exportar CSV</button></div><div id="invBody"></div>
+    <div id="invEmpty" class="empty hidden"><p>Añade lo que tienes a la venta para controlar beneficios.</p></div></div>
+  </section>
+
+  <!-- CALCULADORA -->
+  <section id="calc" class="tab">
+    <div class="panel">
+      <div class="ph"><h3>¿Merece la pena?</h3></div>
+      <div class="cform">
+        <label>Precio de compra<input id="cBuy" class="input" type="number" inputmode="decimal" value="100"></label>
+        <label>Precio de venta<input id="cSell" class="input" type="number" inputmode="decimal" value="150"></label>
+        <label>Envío que pagas<input id="cShip" class="input" type="number" inputmode="decimal" value="0"></label>
+        <label>Otros gastos<input id="cOther" class="input" type="number" inputmode="decimal" value="2"></label>
+        <label>Margen que quieres (%)<input id="cTarget" class="input" type="number" inputmode="decimal" value="25"></label>
+        <label>Comparar con<select id="cProd" class="input"><option value="">— producto —</option></select></label>
+      </div>
+      <div class="cres" id="cRes"></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h3>Mensajes listos</h3></div>
+      <p class="muted small" style="margin-top:0">Nunca se envían solos: los copias y los pegas tú.</p>
+      <div class="cform" style="margin-bottom:10px"><label>Precio a ofrecer<input id="mOffer" class="input" type="number" inputmode="decimal" value="120"></label></div>
+      <div id="tpls"></div>
+    </div>
+  </section>
+
+  <!-- ASISTENTE -->
+  <section id="chat" class="tab">
+    <div id="msgs" class="msgs"></div>
+    <form id="chatForm" class="chatform"><input id="chatIn" class="input" placeholder="Escribe: mejores, solo switch, mercado…" autocomplete="off"><button class="btn primary">➤</button></form>
+    <div class="quick"><button>mejores</button><button>solo tier s</button><button>solo switch</button><button>mercado</button><button>beneficios</button><button>estado</button><button>ayuda</button></div>
+  </section>
+
+  <!-- BÚSQUEDAS -->
+  <section id="busquedas" class="tab">
+    <div class="banner">Estas son las búsquedas que usa el bot de la nube. Para cambiarlas, edita <b>config.json</b> en GitHub o pídemelo y lo hago yo.</div>
+    <div id="slist"></div>
+    <a id="editCfg" class="btn block" style="display:block;text-align:center;text-decoration:none;margin-top:6px" target="_blank">✏️ Editar en GitHub</a>
+  </section>
+
+  <!-- AJUSTES -->
+  <section id="ajustes" class="tab">
+    <div class="panel">
+      <div class="ph"><h3>Estilo de la app</h3></div>
+      <div class="themes" id="themes"></div>
+    </div>
+    <div class="panel form">
+      <h3 style="margin:0">Datos</h3>
+      <label>Usuario de GitHub de la nube<input id="ghUser" class="input" placeholder="ErYowi" autocapitalize="off"></label>
+      <label>Actualizar chollos cada<select id="autoMin" class="input"><option value="2">2 min</option><option value="5">5 min</option><option value="15">15 min</option><option value="0">Solo a mano</option></select></label>
+      <label class="check">Ocultar chollos de tier B<input id="hideB" type="checkbox" class="switch"></label>
+      <label class="check">Solo con envío<input id="onlyShip" type="checkbox" class="switch"></label>
+      <button class="btn primary" data-import>📥 Importar datos del PC</button>
+      <button class="btn" id="exportBtn">📤 Copiar mis datos (copia de seguridad)</button>
+      <button class="btn" id="resetHidden">↩︎ Volver a mostrar chollos descartados</button>
+    </div>
+  </section>
+
+  <section id="registro" class="tab"><pre id="log" class="log"></pre></section>
+
+  <section id="ayuda" class="tab">
+    <div class="panel prose">
+      <h2>Cómo funciona la app</h2>
+      <ol>
+        <li><b>Chollos:</b> salen del bot de la nube (GitHub), que busca en Wallapop y Vinted día y noche y te avisa por Telegram. La app se actualiza sola.</li>
+        <li><b>Ficha de compra rápida:</b> toca cualquier chollo y verás cuánto ofrecer, el margen, mensajes listos para copiar y avisos de estafa.</li>
+        <li><b>Modo vendedor y Beneficios:</b> en el PC pulsa <i>📲 Enviar al móvil</i> en la extensión; te llega un código por Telegram, lo copias y pulsas <i>Importar</i>.</li>
+        <li><b>Estilos:</b> en Ajustes eliges entre 5 estilos.</li>
+      </ol>
+      <h2>Tiers</h2>
+      <p><span class="tag S">S</span> -30 % o más · <span class="tag A">A</span> -20 % · <span class="tag B">B</span> el resto (mínimo -15 %).</p>
+      <p class="muted">0 tokens · nunca compra ni escribe a nadie por ti.</p>
+    </div>
+  </section>
+</main>
+
+<nav class="tabbar" id="tabbar">
+  <button data-tab="resumen" class="on"><i>◉</i>Inicio</button>
+  <button data-tab="chollos"><i>🔥</i>Chollos<em id="nDeals"></em></button>
+  <button data-tab="mercado"><i>📈</i>Mercado</button>
+  <button data-tab="vendedor"><i>🏷</i>Vendedor<em id="nSeller"></em></button>
+  <button data-more><i>☰</i>Más</button>
+</nav>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet"><div class="grab"></div><div id="sheetBody"></div></div>
+<div id="toast" class="toast"></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
